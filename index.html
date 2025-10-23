@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Powered Career Path Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.cdnfonts.com/css/bbh-sans-bogle" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body { font-family:"Poppins",sans-serif;background:linear-gradient(135deg,#f6ff00,#ff00cc);margin:0;padding:0;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;color:#fff;}
+    .container{width:95%;max-width:1000px;background:rgba(255,255,255,0.12);padding:30px 25px 40px;border-radius:20px;box-shadow:0 8px 25px rgba(0,0,0,0.25);backdrop-filter:blur(10px);margin:20px 0;}
+    h1{text-align:center;font-size:2rem;margin-bottom:20px;}
+    label{display:block;margin-top:18px;font-weight:600;font-size:1rem;}
+    input,select{width:100%;padding:12px 14px;margin-top:8px;border:none;border-radius:10px;outline:none;font-size:1rem;color:#333;}
+    .skills-list{margin-top:10px;}
+    .skill-box{background:rgba(255,255,255,0.25);padding:6px 12px;border-radius:8px;margin:5px 5px 0 0;display:inline-block;font-size:0.9rem;}
+    button{margin-top:20px;background:linear-gradient(135deg,#ffcc00,#ff8c00);color:rgb(29,26,26);border:none;padding:12px 20px;border-radius:10px;cursor:pointer;font-weight:bold;transition:all 0.3s ease;font-size:1rem;}
+    button:hover{background:linear-gradient(135deg,#ffe066,#ffb84d);transform:scale(1.05);}
+    #output{margin-top:30px;}
+    .result-section{display:flex;gap:20px;margin-top:30px;flex-wrap:wrap;}
+    .sidebar{flex:0 0 200px;background:rgba(0,0,0,0.2);border-radius:12px;padding:15px;max-height:500px;overflow-y:auto;}
+    .resource-boxes{display:flex;flex-direction:column;gap:12px;}
+    .resource-box{background:linear-gradient(135deg,#5a60ff,#3b3ff3);color:white;border-radius:12px;padding:15px;text-align:center;font-weight:600;cursor:pointer;transition:all 0.3s ease;white-space:nowrap;}
+    .resource-box:hover{transform:scale(1.06);background:linear-gradient(135deg,#6f73ff,#4c4ff6);}
+    .career-content{flex:1;background:rgba(255,255,255,0.15);padding:20px;border-radius:12px;min-width:250px;}
+    #resourcesResult{margin-top:18px;background:rgba(255,255,255,0.15);padding:18px;border-radius:10px;font-size:0.95rem;max-height:400px;overflow-y:auto;}
+    @media(max-width:768px){.result-section{flex-direction:column;}.sidebar{max-height:none;overflow-y:visible;width:100%;}.career-content{width:100%;}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Powered Career Path Finder</h1>
+
+    <label>Step 1: Favourite Subjects</label>
+    <input type="text" id="subjects" placeholder="e.g., Math, Computer Science">
+
+    <label>Step 2: Coding Experience</label>
+    <select id="coding">
+      <option>Just getting started (Beginner)</option>
+      <option>Comfortable with basics (Intermediate)</option>
+      <option>Confident in building projects (Advanced)</option>
+      <option>I love coding and want to pursue it seriously (Passionate)</option>
+      <option>Not Interested</option>
+    </select>
+
+    <label>Step 3: Communication Skills</label>
+    <select id="communication">
+      <option>Poor</option>
+      <option>Average</option>
+      <option>Good</option>
+      <option>Very Good</option>
+      <option>Excellent</option>
+      <option>No Skill</option>
+    </select>
+
+    <label>Step 4: Skills</label>
+    <input type="text" id="skillName" placeholder="Skill name (e.g., Python)">
+    <select id="skillLevel">
+      <option>Beginner</option>
+      <option>Intermediate</option>
+      <option>Advanced</option>
+      <option>Mastered</option>
+    </select>
+    <button onclick="addSkill()">Add Skill</button>
+    <div id="skillsList" class="skills-list"></div>
+
+    <label>Step 5: Career Goal (optional)</label>
+    <input type="text" id="goal" placeholder="e.g., Become an AI Engineer">
+    <button onclick="submitData()">Get Career Advice</button>
+
+    <div id="output">
+      <div class="ai-output">
+        <div class="result-section">
+          <div class="sidebar">
+            <h4>Explore Resources</h4>
+            <div class="resource-boxes">
+              <div class="resource-box" onclick="showCareerPlan()">🧭 Career Plan</div>
+              <div class="resource-box" onclick="fetchResources('Books')">📚 Books</div>
+              <div class="resource-box" onclick="fetchResources('YouTube Videos')">▶ YouTube</div>
+              <div class="resource-box" onclick="fetchResources('Websites')">🌐 Websites</div>
+              <div class="resource-box" onclick="fetchResources('Mobile Apps')">📱 Apps</div>
+              <div class="resource-box" onclick="showHistory()">📜 History</div>
+              <div class="resource-box" id="pdfDownloadBtn" style="display:none;" onclick="downloadPDF()">📄 Download PDF</div>
+            </div>
+          </div>
+          <div class="career-content">
+            <div id="resourcesResult">Click “Career Plan”, “History”, or any resource to explore.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+let skills = [];
+let careerText = "";
+let careerPlanOpened = false;
+let cachedResources = {}; // cache for resources
+
+// ✅ Add Skill
+function addSkill() {
+  const name = document.getElementById("skillName").value.trim();
+  const level = document.getElementById("skillLevel").value;
+  if (name !== "") {
+    skills.push({ name, level });
+    document.getElementById("skillsList").innerHTML += `<div class='skill-box'>${name} (${level})</div>`;
+    document.getElementById("skillName").value = "";
+  }
+}
+
+// ✅ Submit Data
+async function submitData() {
+  const data = {
+    subjects: document.getElementById("subjects").value,
+    coding: document.getElementById("coding").value,
+    communication: document.getElementById("communication").value,
+    skills: skills,
+    goal: document.getElementById("goal").value
+  };
+  document.getElementById("resourcesResult").innerHTML = "<p>Generating career suggestions...</p>";
+  document.getElementById("pdfDownloadBtn").style.display = "none";
+
+  try {
+    const res = await fetch("/get_career_paths", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const response = await res.json();
+    careerText = response.response || "No career plan found.";
+    careerPlanOpened = false;
+    saveToHistory(data.goal || data.subjects, careerText);
+    showCareerPlan();
+
+    if (data.goal) preloadResources(data.goal);
+  } catch (err) {
+    document.getElementById("resourcesResult").innerHTML = "⚠️ Error fetching career plan.";
+  }
+}
+
+// ✅ Preload all resources automatically
+async function preloadResources(goal) {
+  const categories = ["Books", "YouTube Videos", "Websites"];
+  for (const cat of categories) {
+    try {
+      const res = await fetch("/get_resources", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category: cat, goal })
+      });
+      const data = await res.json();
+      cachedResources[cat] = data.response;
+    } catch (err) {
+      cachedResources[cat] = "⚠️ Error preloading " + cat;
+    }
+  }
+}
+
+// ✅ Show Career Plan
+function showCareerPlan() {
+  careerPlanOpened = true;
+  if (!careerText) {
+    document.getElementById("resourcesResult").innerHTML = "<p>No career plan available yet. Please generate first.</p>";
+    return;
+  }
+  document.getElementById("resourcesResult").innerHTML =
+    `<h3>Career Path Plan</h3><div id="careerText">${careerText.replace(/\n/g, "<br>")}</div>`;
+  document.getElementById("pdfDownloadBtn").style.display = "block";
+}
+
+// ✅ Fetch Resources (uses cache if available)
+async function fetchResources(category) {
+  const goal = document.getElementById("goal").value;
+  const resultDiv = document.getElementById("resourcesResult");
+  if (cachedResources[category]) {
+    resultDiv.innerHTML = `<h3>${category}</h3>${cachedResources[category]}`;
+    document.getElementById("pdfDownloadBtn").style.display = "none";
+    return;
+  }
+  resultDiv.innerHTML = `Fetching ${category}...`;
+
+  try {
+    const res = await fetch("/get_resources", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category, goal })
+    });
+    const data = await res.json();
+    cachedResources[category] = data.response;
+    resultDiv.innerHTML = `<h3>${category}</h3>${data.response}`;
+  } catch (err) {
+    resultDiv.innerHTML = "⚠️ Error fetching resources.";
+  }
+}
+
+// ✅ Save and show history
+function saveToHistory(title, content) {
+  let history = JSON.parse(localStorage.getItem("careerHistory") || "[]");
+  const item = { title, content, time: new Date().toLocaleString() };
+  history.unshift(item);
+  if (history.length > 10) history.pop();
+  localStorage.setItem("careerHistory", JSON.stringify(history));
+}
+
+function showHistory() {
+  const resultDiv = document.getElementById("resourcesResult");
+  const history = JSON.parse(localStorage.getItem("careerHistory") || "[]");
+  if (history.length === 0) { resultDiv.innerHTML = "<p>No previous history found.</p>"; return; }
+  let html = "<h3>Search History</h3>";
+  history.forEach((item, index) => {
+    html += `<div style='background:white;color:black;padding:10px;border-radius:8px;margin:5px;cursor:pointer;' onclick='openHistory(${index})'>🔹 <b>${item.title || 'Untitled Search'}</b><br><small>${item.time}</small></div>`;
+  });
+  resultDiv.innerHTML = html;
+}
+
+function openHistory(index) {
+  const history = JSON.parse(localStorage.getItem("careerHistory") || "[]");
+  const item = history[index];
+  if (item) {
+    document.getElementById("resourcesResult").innerHTML = `<h3>Previous Result</h3>${item.content}`;
+    careerPlanOpened = true;
+    document.getElementById("pdfDownloadBtn").style.display = "block";
+  }
+}
+
+// ✅ Download as PDF
+async function downloadPDF() {
+  const textElement = document.getElementById("careerText");
+  if (!textElement) { alert("⚠️ No Career Plan content found!"); return; }
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+  const canvas = await html2canvas(textElement,{scale:2});
+  const imgData = canvas.toDataURL("image/png");
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgWidth = pageWidth - 20;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+  let position = 10;
+  pdf.addImage(imgData,"PNG",10,position,imgWidth,imgHeight);
+  heightLeft -= pageHeight;
+  while (heightLeft > 0) {
+    pdf.addPage();
+    position = heightLeft - imgHeight;
+    pdf.addImage(imgData,"PNG",10,position,imgWidth,imgHeight);
+    heightLeft -= pageHeight;
+  }
+  // ✅ Handle "View Career Plan" button click from AI cards
+async function getCareerPlan(careerName) {
+  document.getElementById("resourcesResult").innerHTML = `<p>Generating detailed career plan for <b>${careerName}</b>...</p>`;
+  document.getElementById("pdfDownloadBtn").style.display = "none";
+
+  const data = {
+    subjects: document.getElementById("subjects").value,
+    coding: document.getElementById("coding").value,
+    communication: document.getElementById("communication").value,
+    skills: skills,
+    goal: careerName  // Use the clicked career as goal
+  };
+
+  try {
+    const res = await fetch("/get_career_paths", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const response = await res.json();
+    careerText = response.response;
+    careerPlanOpened = true;
+
+    // Show result
+    document.getElementById("resourcesResult").innerHTML = `<h3>${careerName} Plan</h3>${careerText}`;
+    document.getElementById("pdfDownloadBtn").style.display = "block";
+
+    // Save to history
+    saveToHistory(careerName, careerText);
+
+    // Preload related resources
+    preloadResources(careerName);
+
+  } catch (err) {
+    document.getElementById("resourcesResult").innerHTML = "⚠️ Error loading detailed plan.";
+  }
+}
+
+  pdf.save("CareerPlan.pdf");
+}
+</script>
+</body>
+</html>
