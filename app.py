@@ -4,7 +4,7 @@ import requests
 
 app = Flask(__name__)
 
-# 🔑 API Keys
+#API Keys
 genai.configure(api_key="AIzaSyAfSKFkki7qfSbvCUTyb_8b1e0pCpGl5b8")
 YOUTUBE_API_KEY = "AIzaSyCToJ5AeKMvmyT8ScMPE4d6xFLEcpylbs4"
 
@@ -38,15 +38,15 @@ User Info:
 - Skills: {skills}
 
 Suggest 5 most suitable career paths with:
-1️⃣ Career Name
-2️⃣ Reason (why suitable)
-3️⃣ Future growth/salary in India.
+1️ Career Name
+2️ Reason (why suitable)
+3️ Future growth/salary in India.
 
 Each career should be inside HTML cards like:
 <div style='background:#000;color:white;padding:15px;margin:10px;border-radius:15px;border:1px solid cyan;box-shadow:0 0 10px cyan;'>
-  <h2 style='color:#00ffff;'>💼 Career Name</h2>
+  <h2 style='color:#00ffff;'> Career Name</h2>
   <p>Reason text...</p>
-  <p>📈 Growth Info...</p>
+  <p> Growth Info...</p>
   <button style='background:linear-gradient(135deg,#00ffff,#0099ff);color:black;border:none;padding:8px 15px;border-radius:8px;cursor:pointer;font-weight:bold;margin-top:8px;' onclick="getCareerPlan('Career Name')">View Career Plan</button>
 </div>
 """
@@ -103,7 +103,7 @@ def fetch_youtube_videos(query, max_results=5):
         <div style='margin:10px;background:white;color:black;padding:10px;border-radius:10px;'>
         <img src='{thumbnail}' width='450' style='border-radius:8px;'><br>
         <b style='color:#007bff;'>{idx}. {title}</b><br>
-        🎓 {channel}<br>
+         {channel}<br>
         <a href='{link}' target='_blank' style='color:#ff6600;'>Watch</a>
         </div>
         """)
@@ -137,3 +137,4 @@ Format with:
 
 if __name__ == '__main__':
     app.run(debug=True)
+
