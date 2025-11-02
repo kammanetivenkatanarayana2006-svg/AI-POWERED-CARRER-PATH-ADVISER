@@ -75,13 +75,13 @@
           <div class="sidebar">
             <h4>Explore Resources</h4>
             <div class="resource-boxes">
-              <div class="resource-box" onclick="showCareerPlan()">🧭 Career Plan</div>
-              <div class="resource-box" onclick="fetchResources('Books')">📚 Books</div>
-              <div class="resource-box" onclick="fetchResources('YouTube Videos')">▶ YouTube</div>
-              <div class="resource-box" onclick="fetchResources('Websites')">🌐 Websites</div>
-              <div class="resource-box" onclick="fetchResources('Mobile Apps')">📱 Apps</div>
-              <div class="resource-box" onclick="showHistory()">📜 History</div>
-              <div class="resource-box" id="pdfDownloadBtn" style="display:none;" onclick="downloadPDF()">📄 Download PDF</div>
+              <div class="resource-box" onclick="showCareerPlan()"> Career Plan</div>
+              <div class="resource-box" onclick="fetchResources('Books')"> Books</div>
+              <div class="resource-box" onclick="fetchResources('YouTube Videos')"> YouTube</div>
+              <div class="resource-box" onclick="fetchResources('Websites')">Websites</div>
+              <div class="resource-box" onclick="fetchResources('Mobile Apps')"> Apps</div>
+              <div class="resource-box" onclick="showHistory()">History</div>
+              <div class="resource-box" id="pdfDownloadBtn" style="display:none;" onclick="downloadPDF()"> Download PDF</div>
             </div>
           </div>
           <div class="career-content">
@@ -98,7 +98,7 @@ let careerText = "";
 let careerPlanOpened = false;
 let cachedResources = {}; // cache for resources
 
-// ✅ Add Skill
+// Add Skill
 function addSkill() {
   const name = document.getElementById("skillName").value.trim();
   const level = document.getElementById("skillLevel").value;
@@ -109,7 +109,7 @@ function addSkill() {
   }
 }
 
-// ✅ Submit Data
+//Submit Data
 async function submitData() {
   const data = {
     subjects: document.getElementById("subjects").value,
@@ -135,11 +135,11 @@ async function submitData() {
 
     if (data.goal) preloadResources(data.goal);
   } catch (err) {
-    document.getElementById("resourcesResult").innerHTML = "⚠️ Error fetching career plan.";
+    document.getElementById("resourcesResult").innerHTML = " Error fetching career plan.";
   }
 }
 
-// ✅ Preload all resources automatically
+//Preload all resources automatically
 async function preloadResources(goal) {
   const categories = ["Books", "YouTube Videos", "Websites"];
   for (const cat of categories) {
@@ -152,12 +152,12 @@ async function preloadResources(goal) {
       const data = await res.json();
       cachedResources[cat] = data.response;
     } catch (err) {
-      cachedResources[cat] = "⚠️ Error preloading " + cat;
+      cachedResources[cat] = " Error preloading " + cat;
     }
   }
 }
 
-// ✅ Show Career Plan
+//Show Career Plan
 function showCareerPlan() {
   careerPlanOpened = true;
   if (!careerText) {
@@ -169,7 +169,7 @@ function showCareerPlan() {
   document.getElementById("pdfDownloadBtn").style.display = "block";
 }
 
-// ✅ Fetch Resources (uses cache if available)
+//Fetch Resources (uses cache if available)
 async function fetchResources(category) {
   const goal = document.getElementById("goal").value;
   const resultDiv = document.getElementById("resourcesResult");
@@ -190,11 +190,11 @@ async function fetchResources(category) {
     cachedResources[category] = data.response;
     resultDiv.innerHTML = `<h3>${category}</h3>${data.response}`;
   } catch (err) {
-    resultDiv.innerHTML = "⚠️ Error fetching resources.";
+    resultDiv.innerHTML = "Error fetching resources.";
   }
 }
 
-// ✅ Save and show history
+//Save and show history
 function saveToHistory(title, content) {
   let history = JSON.parse(localStorage.getItem("careerHistory") || "[]");
   const item = { title, content, time: new Date().toLocaleString() };
@@ -224,10 +224,10 @@ function openHistory(index) {
   }
 }
 
-// ✅ Download as PDF
+// Download as PDF
 async function downloadPDF() {
   const textElement = document.getElementById("careerText");
-  if (!textElement) { alert("⚠️ No Career Plan content found!"); return; }
+  if (!textElement) { alert(" No Career Plan content found!"); return; }
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p","mm","a4");
   const canvas = await html2canvas(textElement,{scale:2});
@@ -246,7 +246,7 @@ async function downloadPDF() {
     pdf.addImage(imgData,"PNG",10,position,imgWidth,imgHeight);
     heightLeft -= pageHeight;
   }
-  // ✅ Handle "View Career Plan" button click from AI cards
+  //Handle "View Career Plan" button click from AI cards
 async function getCareerPlan(careerName) {
   document.getElementById("resourcesResult").innerHTML = `<p>Generating detailed career plan for <b>${careerName}</b>...</p>`;
   document.getElementById("pdfDownloadBtn").style.display = "none";
@@ -280,7 +280,7 @@ async function getCareerPlan(careerName) {
     preloadResources(careerName);
 
   } catch (err) {
-    document.getElementById("resourcesResult").innerHTML = "⚠️ Error loading detailed plan.";
+    document.getElementById("resourcesResult").innerHTML = " Error loading detailed plan.";
   }
 }
 
@@ -289,3 +289,4 @@ async function getCareerPlan(careerName) {
 </script>
 </body>
 </html>
+
